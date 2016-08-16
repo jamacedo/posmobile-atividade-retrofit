@@ -11,6 +11,6 @@ import retrofit2.http.Query;
 public interface PrevisoesAPI {
 
     @GET("daily?mode=json&lang=pt&units=metric&cnt=14")
-    Call<Previsoes> getPrevisoes(@Query("q") String cidade);//todo Inclua um parametro para passar dinamicamente o APPID
+    Call<Previsoes> getPrevisoes(@Query("q") String cidade);//todo Inclua um parametro para passar dinamicamente o APPID como String
 
 }
