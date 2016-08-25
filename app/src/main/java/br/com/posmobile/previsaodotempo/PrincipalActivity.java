@@ -64,17 +64,27 @@ public class PrincipalActivity extends AppCompatActivity {
         gsonBldr.registerTypeAdapter(Previsao.class, new PrevisaoDeserializer());
 
         retrofit = new Retrofit.Builder()
-                //todo Inclua a url base no construtor do Retrofit
+                .baseUrl(Utils.URL_BASE)
                 .addConverterFactory(GsonConverterFactory.create(gsonBldr.create()))
                 .build();
 
         //todo Inicialize a variável previsoesAPI utilizando o método create do objeto retrofit
+        PrevisoesAPI previsoesAPI = retrofit.create(PrevisoesAPI.class);
 
         Call<Previsoes> callbackPrevisoes;
         callbackPrevisoes = previsoesAPI.getPrevisoes("vitoria,brazil", Utils.API_KEY);
-        //todo Chame o método enqueue (do objeto callbackPrevisoes) passando como parametro um novo Callback
-        //todo Complete o método onResponse (do novo Callback) 1. buscando as previsões em response.body() 2. Chamando o método atualizaPrevisoes
 
+        callbackPrevisoes.enqueue(new Callback<Previsoes>() {
+            @Override
+            public void onResponse(Call<Previsoes> call, retrofit2.Response<Previsoes> response) {
+                atualizaPrevisoes(response.body().previsaoList);
+            }
+
+            @Override
+            public void onFailure(Call<Previsoes> call, Throwable t) {
+                Log.e(PrincipalActivity.class.getSimpleName(),t.getMessage());
+            }
+        });
     }
 
     private void atualizaPrevisoes(List<Previsao> previsoes) {
