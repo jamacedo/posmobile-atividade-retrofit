@@ -3,6 +3,7 @@ package br.com.posmobile.previsaodotempo;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.util.Util;
 import com.google.gson.GsonBuilder;
 
 import org.json.JSONArray;
@@ -23,7 +25,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -32,6 +37,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Query;
 
 public class PrincipalActivity extends AppCompatActivity {
 
@@ -65,16 +71,28 @@ public class PrincipalActivity extends AppCompatActivity {
 
         retrofit = new Retrofit.Builder()
                 //todo Inclua a url base no construtor do Retrofit
+                .baseUrl(Utils.URL_BASE)
                 .addConverterFactory(GsonConverterFactory.create(gsonBldr.create()))
                 .build();
 
         //todo Inicialize a variável previsoesAPI utilizando o método create do objeto retrofit
+        PrevisoesAPI previsoesAPI = retrofit.create(PrevisoesAPI.class);
 
         Call<Previsoes> callbackPrevisoes;
         callbackPrevisoes = previsoesAPI.getPrevisoes("vitoria,brazil", Utils.API_KEY);
         //todo Chame o método enqueue (do objeto callbackPrevisoes) passando como parametro um novo Callback
-        //todo Complete o método onResponse (do novo Callback) 1. buscando as previsões em response.body() 2. Chamando o método atualizaPrevisoes
+        callbackPrevisoes.enqueue(new Callback<Previsoes>() {
+            //todo Complete o método onResponse (do novo Callback) 1. buscando as previsões em response.body() 2. Chamando o método atualizaPrevisoes
+            @Override
+            public void onResponse(Call<Previsoes> call, retrofit2.Response<Previsoes> response) {
+                List<Previsao> p = response.body().previsaoList;
+                atualizaPrevisoes(p);
+            }
 
+            @Override
+            public void onFailure(Call<Previsoes> call, Throwable t) {
+            }
+        });
     }
 
     private void atualizaPrevisoes(List<Previsao> previsoes) {
