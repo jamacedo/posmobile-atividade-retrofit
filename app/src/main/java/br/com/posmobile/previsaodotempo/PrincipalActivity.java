@@ -70,7 +70,7 @@ public class PrincipalActivity extends AppCompatActivity {
                 .build();
 
         //done Inicialize a variável previsoesAPI utilizando o método create do objeto retrofit
-        PrevisoesAPI previsoesAPI = retrofit.create(PrevisoesAPI.class);
+        previsoesAPI = retrofit.create(PrevisoesAPI.class);
 
         Call<Previsoes> callbackPrevisoes;
         callbackPrevisoes = previsoesAPI.getPrevisoes("vitoria,brazil", Utils.API_KEY);
