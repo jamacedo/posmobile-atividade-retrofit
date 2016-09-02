@@ -1,5 +1,6 @@
 package br.com.posmobile.previsaodotempo;
 
+import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.util.Util;
 import com.google.gson.GsonBuilder;
 
 import org.json.JSONArray;
@@ -34,19 +36,13 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class PrincipalActivity extends AppCompatActivity {
-
-
     ListView listaPrevisoes;
     List<Previsao> previsoes = new ArrayList<Previsao>();
-
     TextView tvTemperaturaHoje;
     TextView tvPeriodoHoje;
     ImageView ivIconeHoje;
-
-
     Retrofit retrofit;
     PrevisoesAPI previsoesAPI;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,15 +61,37 @@ public class PrincipalActivity extends AppCompatActivity {
 
         retrofit = new Retrofit.Builder()
                 //todo Inclua a url base no construtor do Retrofit
+                .baseUrl(Utils.URL_BASE)
                 .addConverterFactory(GsonConverterFactory.create(gsonBldr.create()))
                 .build();
 
         //todo Inicialize a variável previsoesAPI utilizando o método create do objeto retrofit
+        PrevisoesAPI previsoesAPI = retrofit.create(PrevisoesAPI.class);
 
-        Call<Previsoes> callbackPrevisoes;
-        callbackPrevisoes = previsoesAPI.getPrevisoes("vitoria,brazil", Utils.API_KEY);
+        Call<Previsoes> callbackPrevisoes = previsoesAPI.getPrevisoes("vitoria,brazil",Utils.API_KEY);
+
         //todo Chame o método enqueue (do objeto callbackPrevisoes) passando como parametro um novo Callback
         //todo Complete o método onResponse (do novo Callback) 1. buscando as previsões em response.body() 2. Chamando o método atualizaPrevisoes
+        callbackPrevisoes.enqueue(new Callback<Previsoes>() {
+            @Override
+            public void onResponse(Call<Previsoes> callbackPrevisoes, retrofit2.Response<Previsoes> response) {
+                Previsoes previsoes = response.body();
+
+                if(previsoes!= null) {
+                    Log.i("Log","TEMOS PREVISOES");
+                    Log.i("Log",previsoes.toString());
+                    atualizaPrevisoes(previsoes.previsaoList);
+                }
+                else{
+                    Log.i("Log","NAO FORAM CARREGADAS PREVISOES");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Previsoes> call, Throwable t) {
+                Log.i("Erro: ","");
+            }
+        });
 
     }
 
@@ -90,5 +108,6 @@ public class PrincipalActivity extends AppCompatActivity {
         this.previsoes.addAll(previsoes);
         ((ArrayAdapter) PrincipalActivity.this.listaPrevisoes.getAdapter()).notifyDataSetChanged();
     }
+
 
 }
