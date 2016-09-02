@@ -8,9 +8,8 @@ import retrofit2.http.Query;
  * Created by alexandre on 07/08/16.
  */
 
-public interface PrevisoesAPI {
-
+public interface PrevisoesAPI
+{
     @GET("daily?mode=json&lang=pt&units=metric&cnt=14")
-    Call<Previsoes> getPrevisoes(@Query("q") String cidade);//todo Inclua um parametro para passar dinamicamente o APPID como String
-
+    Call<Previsoes> getPrevisoes(@Query("q") String cidade, @Query("APPID") String appId);
 }

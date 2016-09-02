@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.util.Util;
 import com.google.gson.GsonBuilder;
 
 import org.json.JSONArray;
@@ -33,7 +34,8 @@ import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class PrincipalActivity extends AppCompatActivity {
+public class PrincipalActivity extends AppCompatActivity
+{
 
 
     ListView listaPrevisoes;
@@ -43,13 +45,13 @@ public class PrincipalActivity extends AppCompatActivity {
     TextView tvPeriodoHoje;
     ImageView ivIconeHoje;
 
-
     Retrofit retrofit;
     PrevisoesAPI previsoesAPI;
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.principal);
         listaPrevisoes = (ListView) findViewById(R.id.previsoesListView);
@@ -64,20 +66,32 @@ public class PrincipalActivity extends AppCompatActivity {
         gsonBldr.registerTypeAdapter(Previsao.class, new PrevisaoDeserializer());
 
         retrofit = new Retrofit.Builder()
-                //todo Inclua a url base no construtor do Retrofit
+                .baseUrl(Utils.URL_BASE)
                 .addConverterFactory(GsonConverterFactory.create(gsonBldr.create()))
                 .build();
 
-        //todo Inicialize a variável previsoesAPI utilizando o método create do objeto retrofit
+        previsoesAPI = retrofit.create(PrevisoesAPI.class);
 
         Call<Previsoes> callbackPrevisoes;
         callbackPrevisoes = previsoesAPI.getPrevisoes("vitoria,brazil", Utils.API_KEY);
-        //todo Chame o método enqueue (do objeto callbackPrevisoes) passando como parametro um novo Callback
-        //todo Complete o método onResponse (do novo Callback) 1. buscando as previsões em response.body() 2. Chamando o método atualizaPrevisoes
 
+        callbackPrevisoes.enqueue(new Callback<Previsoes>(){
+            @Override
+            public void onResponse(Call<Previsoes> call, retrofit2.Response<Previsoes> response)
+            {
+                atualizaPrevisoes(response.body().previsaoList);
+            }
+
+            @Override
+            public void onFailure(Call<Previsoes> call, Throwable t)
+            {
+
+            }
+        });
     }
 
-    private void atualizaPrevisoes(List<Previsao> previsoes) {
+    private void atualizaPrevisoes(List<Previsao> previsoes)
+    {
         this.previsoes.clear();
         Previsao previsaoDestaque = previsoes.remove(0);
         tvTemperaturaHoje.setText(previsaoDestaque.getTemperatura());
