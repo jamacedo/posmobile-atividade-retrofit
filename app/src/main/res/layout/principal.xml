@@ -45,7 +45,7 @@
             android:layout_below="@+id/textViewTempHoje"
             android:layout_alignLeft="@+id/textViewPeriodoHoje"
             android:layout_alignStart="@+id/textViewPeriodoHoje"
-            android:id="@+id/textView3"
+            android:id="@+id/textViewCidade"
             android:textColor="@android:color/background_light"
             android:textSize="35sp" />
 

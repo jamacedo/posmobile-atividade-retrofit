@@ -13,4 +13,5 @@ public class Previsoes {
     @SerializedName("list")
     List<Previsao> previsaoList;
 
+    Cidade city;
 }

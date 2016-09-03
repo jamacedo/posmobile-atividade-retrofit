@@ -19,10 +19,12 @@ public class PrevisaoDeserializer implements JsonDeserializer<Previsao> {
     public Previsao deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonObject = json.getAsJsonObject();
         Previsao previsaoTemp = new Previsao();
+
         previsaoTemp.setPeriodo(jsonObject.getAsJsonPrimitive("dt").getAsLong() * 1000);
         previsaoTemp.setTemperatura(jsonObject.getAsJsonObject("temp").getAsJsonPrimitive("day").getAsString() + "°");
         previsaoTemp.setIcone(jsonObject.getAsJsonArray("weather").get(0).getAsJsonObject().getAsJsonPrimitive("icon").getAsString());
         previsaoTemp.setDescricao(jsonObject.getAsJsonArray("weather").get(0).getAsJsonObject().getAsJsonPrimitive("description").getAsString());
+
         return previsaoTemp;
     }
 }

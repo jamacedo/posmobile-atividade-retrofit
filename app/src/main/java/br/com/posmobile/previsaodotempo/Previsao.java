@@ -16,8 +16,8 @@ public class Previsao {
     String temperatura;
     String icone;
     String descricao;
-    final static SimpleDateFormat dateFormat =
-                   new SimpleDateFormat("dd, EEEE");
+    final static Locale local = new Locale("pt","BR");
+    final static SimpleDateFormat dateFormat = new SimpleDateFormat("dd, EEEE", local);
 
 
     public Previsao() {
@@ -52,7 +52,6 @@ public class Previsao {
         this.icone = icone;
     }
 
-
     public String getDescricao() {
         return descricao;
     }
@@ -60,4 +59,5 @@ public class Previsao {
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
+
 }

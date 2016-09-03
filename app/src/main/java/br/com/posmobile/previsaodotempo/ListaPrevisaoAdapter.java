@@ -31,11 +31,10 @@ public class ListaPrevisaoAdapter extends ArrayAdapter<Previsao> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_previsao, parent, false);
         }
 
-        TextView tvPeriodo = (TextView) convertView.findViewById(R.id.textViewPeriodo);
-        TextView tvTemperatura = (TextView) convertView.findViewById(R.id.textViewTemperatura);
-        TextView tvDescricao = (TextView) convertView.findViewById(R.id.textViewDescricao);
-        ImageView ivIcone = (ImageView) convertView.findViewById(R.id.imageViewTempo);
-
+        TextView tvPeriodo      = (TextView) convertView.findViewById(R.id.textViewPeriodo);
+        TextView tvTemperatura  = (TextView) convertView.findViewById(R.id.textViewTemperatura);
+        TextView tvDescricao    = (TextView) convertView.findViewById(R.id.textViewDescricao);
+        ImageView ivIcone       = (ImageView)convertView.findViewById(R.id.imageViewTempo);
 
         tvPeriodo.setText(previsao.getPeriodo());
         tvTemperatura.setText(previsao.getTemperatura());

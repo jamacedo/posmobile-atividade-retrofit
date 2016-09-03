@@ -7,7 +7,7 @@ package br.com.posmobile.previsaodotempo;
 
 public class Utils {
 
-    public static final String API_KEY = "de0c7357d361be8987b08ef3354969bb";
+    public static final String API_KEY = "af86bb2603fc65128ca2c258645bd1dd";
     public static final String URL_BASE = "http://api.openweathermap.org/data/2.5/forecast/";
     public static final String URL_ICONE = "http://openweathermap.org/img/w/%s.png";
 
