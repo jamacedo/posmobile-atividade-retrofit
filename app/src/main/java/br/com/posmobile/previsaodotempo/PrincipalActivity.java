@@ -1,11 +1,17 @@
 package br.com.posmobile.previsaodotempo;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -35,53 +41,40 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class PrincipalActivity extends AppCompatActivity {
 
-
     ListView listaPrevisoes;
     List<Previsao> previsoes = new ArrayList<Previsao>();
 
     TextView tvTemperaturaHoje;
     TextView tvPeriodoHoje;
+    TextView tvCidade;
     ImageView ivIconeHoje;
-
 
     Retrofit retrofit;
     PrevisoesAPI previsoesAPI;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.principal);
-        listaPrevisoes = (ListView) findViewById(R.id.previsoesListView);
-        tvTemperaturaHoje = (TextView) findViewById(R.id.textViewTempHoje);
-        tvPeriodoHoje = (TextView) findViewById(R.id.textViewPeriodoHoje);
-        ivIconeHoje = (ImageView) findViewById(R.id.imageViewIconeHoje);
+
+        listaPrevisoes      = (ListView) findViewById(R.id.previsoesListView);
+        tvTemperaturaHoje   = (TextView) findViewById(R.id.textViewTempHoje);
+        tvPeriodoHoje       = (TextView) findViewById(R.id.textViewPeriodoHoje);
+        tvCidade            = (TextView) findViewById(R.id.textViewCidade);
+        ivIconeHoje         = (ImageView)findViewById(R.id.imageViewIconeHoje);
 
         listaPrevisoes.setAdapter(new ListaPrevisaoAdapter(this, previsoes));
 
-        //Precisamos registrar esse deserializador para ajustar o Json da API com nosso objeto com atributos resumidos...
-        GsonBuilder gsonBldr = new GsonBuilder();
-        gsonBldr.registerTypeAdapter(Previsao.class, new PrevisaoDeserializer());
 
-        retrofit = new Retrofit.Builder()
-                //todo Inclua a url base no construtor do Retrofit
-                .addConverterFactory(GsonConverterFactory.create(gsonBldr.create()))
-                .build();
-
-        //todo Inicialize a variável previsoesAPI utilizando o método create do objeto retrofit
-
-        Call<Previsoes> callbackPrevisoes;
-        callbackPrevisoes = previsoesAPI.getPrevisoes("vitoria,brazil", Utils.API_KEY);
-        //todo Chame o método enqueue (do objeto callbackPrevisoes) passando como parametro um novo Callback
-        //todo Complete o método onResponse (do novo Callback) 1. buscando as previsões em response.body() 2. Chamando o método atualizaPrevisoes
 
     }
 
-    private void atualizaPrevisoes(List<Previsao> previsoes) {
+    private void atualizaPrevisoes(List<Previsao> previsoes, Cidade cidade) {
         this.previsoes.clear();
         Previsao previsaoDestaque = previsoes.remove(0);
         tvTemperaturaHoje.setText(previsaoDestaque.getTemperatura());
         tvPeriodoHoje.setText(previsaoDestaque.getPeriodo());
+        tvCidade.setText(cidade.getName());
 
         Glide.with(PrincipalActivity.this).
                 load(String.format(Utils.URL_ICONE, previsaoDestaque.getIcone())).
@@ -89,6 +82,67 @@ public class PrincipalActivity extends AppCompatActivity {
 
         this.previsoes.addAll(previsoes);
         ((ArrayAdapter) PrincipalActivity.this.listaPrevisoes.getAdapter()).notifyDataSetChanged();
+    }
+
+    //Inflando o menu de configurações
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menuconfig, menu);
+        return true;
+    }
+
+    //Ao clicar nas opções do menu, chama as respectivas ações
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.config:
+                Intent i = new Intent(this, ConfigActivity.class);
+                startActivity(i);
+                break;
+        }
+        return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //Testando valores das configurações
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        String prefcidade = settings.getString("edtCidade", "sem dados");
+
+        GsonBuilder gsonBldr = new GsonBuilder();
+        gsonBldr.registerTypeAdapter(Previsao.class, new PrevisaoDeserializer());
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl(Utils.URL_BASE)
+                .addConverterFactory(GsonConverterFactory.create(gsonBldr.create()))
+                .build();
+
+        previsoesAPI = retrofit.create(PrevisoesAPI.class);
+
+        Call<Previsoes> callbackPrevisoes;
+        callbackPrevisoes = previsoesAPI.getPrevisoes(prefcidade, Utils.API_KEY);
+
+        callbackPrevisoes.enqueue(new Callback<Previsoes>() {
+            @Override
+            public void onResponse(Call<Previsoes> call, retrofit2.Response<Previsoes> response) {
+                List<Previsao> previsoes = new ArrayList<>();
+                previsoes.addAll(response.body().previsaoList);
+
+                Cidade cidade = response.body().city;
+
+                atualizaPrevisoes(previsoes, cidade);
+            }
+
+            @Override
+            public void onFailure(Call<Previsoes> call, Throwable t) {
+
+            }
+        });
+
+        //Toast.makeText(PrincipalActivity.this, "Preferências: Cidade["+prefcidade+"], atualização automática["+prefatualiza+"]", Toast.LENGTH_LONG).show();
     }
 
 }
